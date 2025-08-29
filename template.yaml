@@ -1,0 +1,35 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Serverless Image Processing Pipeline
+
+Resources:
+  ImageProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: image-processing-function
+      Runtime: python3.11
+      Handler: app.lambda_handler
+      CodeUri: ./src
+      MemorySize: 512
+      Timeout: 30
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref InputBucket
+        - S3WritePolicy:
+            BucketName: !Ref OutputBucket
+      Events:
+        S3UploadEvent:
+          Type: S3
+          Properties:
+            Bucket: !Ref InputBucket
+            Events: s3:ObjectCreated:*
+
+  InputBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: image-pipeline-input-umesh
+
+  OutputBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: image-pipeline-output-umesh
